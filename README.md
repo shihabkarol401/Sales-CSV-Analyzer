@@ -1,4 +1,4 @@
-\# Sales CSV Analyzer
+## Sales CSV Analyzer
 
 
 
@@ -6,7 +6,7 @@ A full-stack web application for uploading, validating, filtering, analyzing, an
 
 
 
-\## Features
+## Features
 
 
 
@@ -46,11 +46,11 @@ A full-stack web application for uploading, validating, filtering, analyzing, an
 
 
 
-\## Tech Stack
+## Tech Stack
 
 
 
-\### Frontend
+### Frontend
 
 
 
@@ -68,7 +68,7 @@ A full-stack web application for uploading, validating, filtering, analyzing, an
 
 
 
-\### Backend
+### Backend
 
 
 
@@ -82,13 +82,13 @@ A full-stack web application for uploading, validating, filtering, analyzing, an
 
 
 
-\## Project Structure
+## Project Structure
 
 
 
 ```text
 
-sales-csv-analyzer/
+sales-csv-analyzer
 
 │
 
@@ -123,26 +123,26 @@ sales-csv-analyzer/
 ├── README.md
 
 └── AI\_USAGE.md
+```
 
 
-
-\## CSV Format-
+## CSV Format
 
 The uploaded CSV must contain the following columns:
 
 
 
-Date
+- Date
 
-Retailer
+- Retailer
 
-Product
+- Product
 
-Quantity
+- Quantity
 
-Regular Price
+- Regular Price
 
-Promotion Price
+- Promotion Price
 
 
 
@@ -160,27 +160,27 @@ Date,Retailer,Product,Quantity,Regular Price,Promotion Price
 
 
 
-\## Validation
+## Validation
 
 The backend validates:
 
 
 
-File type
+- File type
 
-Empty files
+- Empty files
 
-UTF-8 encoding
+- UTF-8 encoding
 
-Required CSV columns
+- Required CSV columns
 
-Missing text values
+- Missing text values
 
-Numeric values
+- Numeric values
 
-Negative quantities
+- Negative quantities
 
-Negative prices
+- Negative prices
 
 
 
@@ -188,31 +188,23 @@ Invalid files are rejected and the application displays the validation errors.
 
 
 
-\## Calculated Metrics
+## Calculated Metrics
 
-Total Quantity
+-Total Quantity
 
+-Sum of the Quantity column.
 
-
-Sum of the Quantity column.
-
-
-
-Total Sales Value Calculated using:
+-Total Sales Value Calculated using:
 
 Quantity × Promotion Price
 
 for each row.
 
-
-
-Average Selling Price Calculated using:
+- Average Selling Price Calculated using:
 
 Total Sales Value ÷ Total Quantity
 
-
-
-Promotion Percentage-
+- Promotion Percentage
 
 Percentage of rows where:
 
@@ -220,53 +212,52 @@ Promotion Price < Regular Price
 
 
 
-\## Running the Application:
+## Running the Application
 
-1\. Start the Backend.
-
+1. Start the Backend.
 Open a terminal and navigate to the backend:
 
 cd backend
 
 
 
-Create the virtual environment if it does not already exist:
+- Create the virtual environment if it does not already exist:
 
 python -m venv venv
 
 
 
-Activate it:
+- Activate it:
 
 venv\\Scripts\\activate
 
 
 
-Install dependencies:
+- Install dependencies:
 
 pip install -r requirements.txt
 
 
 
-Start FastAPI:
+- Start FastAPI:
 
 uvicorn main:app --reload
 
 
 
-The backend will run at:
+- The backend will run at:
 
 http://127.0.0.1:8000
 
 
 
-FastAPI documentation is available at:
+- FastAPI documentation is available at:
 
 http://127.0.0.1:8000/docs
 
 
 
-2\. Start the Frontend.
+2. Start the Frontend.
 
 Open another terminal and navigate to the project root:
 
@@ -274,51 +265,51 @@ cd C:\\Users\\shiha\\Desktop\\sales-csv-analyzer
 
 
 
-Install frontend dependencies:
+- Install frontend dependencies:
 
 npm install
 
 
 
-Start the development server:
+- Start the development server:
 
 npm run dev
 
 
 
-The frontend will run at:
+- The frontend will run at:
 
 http://localhost:5173
 
 
 
-Usage:
+## Usage
 
 1. Open the application.
 
-2\. Upload a CSV file using the file picker.
+2. Upload a CSV file using the file picker.
 
-3\. The backend validates the uploaded CSV.
+3. The backend validates the uploaded CSV.
 
-4\. If valid, the sales data and metrics are displayed.
+4. If valid, the sales data and metrics are displayed.
 
-5\. Use the filters to narrow the data.
+5. Use the filters to narrow the data.
 
-6\. Review the table and chart.
+6. Review the table and chart.
 
-7\. Click Download Filtered CSV to export the filtered results.
+7. Click Download Filtered CSV to export the filtered results.
 
 
 
-API-
+## API
 
-Health Check:
+- Health Check:
 
 GET /
 
 
 
-Returns:
+- Returns:
 
 {
 
@@ -328,13 +319,13 @@ Returns:
 
 
 
-Upload CSV-
+- Upload CSV:
 
 POST /upload
 
 
 
-Accepts a CSV file and returns:
+- Accepts a CSV file and returns:
 
 Validation status
 
@@ -346,45 +337,47 @@ Calculated metrics
 
 
 
-Development:
+## Development
 
-The project uses separate frontend and backend applications.
+- The project uses separate frontend and backend applications.
 
-
-
-React + TypeScript
+ React + TypeScript
 
 &#x20;       ↓
 
-HTTP POST
+ HTTP POST
 
 &#x20;       ↓
 
-FastAPI
+ FastAPI
 
 &#x20;       ↓
 
-CSV validation + processing
+ CSV validation + processing
 
 &#x20;       ↓
 
-JSON response
+ JSON response
 
 &#x20;       ↓
 
-React dashboard
+ React dashboard
 
 
 
-The frontend handles the user interface, filtering, visualization, and CSV export.
+- The frontend handles the user interface, filtering, visualization, and CSV export.
 
-The backend handles CSV validation, data parsing, and calculation of the initial sales metrics.
+- The backend handles CSV validation, data parsing, and calculation of the initial sales metrics.
 
 
 
-License:
+## License
 
 This project was created as a technical assessment project.
 
+## Live Demo
 
+- **Live Demo:** https://sales-csv-analyzer.vercel.app/
+- **Backend API:** https://sales-csv-analyzer-api.onrender.com/
+- **API Documentation:** https://sales-csv-analyzer-api.onrender.com/docs
 

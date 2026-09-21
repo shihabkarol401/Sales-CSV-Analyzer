@@ -1,122 +1,420 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState } from "react";
+import Papa from "papaparse";
+import "./App.css";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
+type SalesRow = {
+  date: string;
+  retailer: string;
+  product: string;
+  quantity: number;
+  regularPrice: number;
+  promotionPrice: number;
+};
+
+type SalesMetrics = {
+  totalQuantity: number;
+  totalSalesValue: number;
+  averageSellingPrice: number;
+  promotionPercentage: number;
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [fileName, setFileName] = useState("");
+  const [validationMessage, setValidationMessage] = useState("");
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [salesData, setSalesData] = useState<SalesRow[]>([]);
+  const [backendMetrics, setBackendMetrics] =
+    useState<SalesMetrics | null>(null);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedRetailer, setSelectedRetailer] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState("");
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+  // Filter the sales data
+  const filteredData = salesData.filter((row) => {
+    const matchesDate =
+      selectedDate === "" || row.date === selectedDate;
 
-      <div className="ticks"></div>
+    const matchesRetailer =
+      selectedRetailer === "" ||
+      row.retailer === selectedRetailer;
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+    const matchesProduct =
+      selectedProduct === "" ||
+      row.product === selectedProduct;
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    return matchesDate && matchesRetailer && matchesProduct;
+  });
+
+  // Calculate total quantity
+  const totalQuantity = filteredData.reduce(
+    (total, row) => total + row.quantity,
+    0
+  );
+
+  // Calculate total sales value
+  const totalSalesValue = filteredData.reduce(
+    (total, row) => total + row.quantity * row.promotionPrice,
+    0
+  );
+
+  // Calculate average selling price
+  const averageSellingPrice =
+    totalQuantity > 0
+      ? totalSalesValue / totalQuantity
+      : 0;
+
+  // Calculate promotion percentage
+  const promotedRows = filteredData.filter(
+    (row) => row.promotionPrice < row.regularPrice
+  ).length;
+
+  const promotionPercentage =
+    filteredData.length > 0
+      ? (promotedRows / filteredData.length) * 100
+      : 0;
+  
+  const chartData = filteredData.map((row) => ({
+    product: row.product,
+    salesValue: row.quantity * row.promotionPrice,
+  }));
+
+  function handleDownloadCSV() {
+  if (filteredData.length === 0) {
+    return;
+  }
+
+  const csv = Papa.unparse(
+    filteredData.map((row) => ({
+      Date: row.date,
+      Retailer: row.retailer,
+      Product: row.product,
+      Quantity: row.quantity,
+      "Regular Price": row.regularPrice,
+      "Promotion Price": row.promotionPrice,
+    }))
+  );
+
+  const blob = new Blob([csv], {
+    type: "text/csv;charset=utf-8;",
+  });
+
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = "filtered_sales_data.csv";
+
+  link.click();
+
+  URL.revokeObjectURL(url);
 }
 
-export default App
+  async function handleFileChange(
+  event: React.ChangeEvent<HTMLInputElement>
+) {
+  const file = event.target.files?.[0];
+
+  if (!file) {
+    return;
+  }
+  setFileName(file.name);
+
+  setValidationMessage("");
+  setValidationErrors([]);
+  setBackendMetrics(null);
+
+  const formData = new FormData();
+
+  formData.append("file", file);
+
+  try {
+    const response = await fetch(
+      "http://127.0.0.1:8000/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Server error: ${response.status}`
+      );
+    }
+
+    const result = await response.json();
+    if (typeof result.valid !== "boolean") {
+      throw new Error(
+        "Invalid response received from backend."
+      );
+    }
+
+    console.log("Backend response:", result);
+
+    if (!result.valid) {
+      setValidationMessage(
+        result.message || "CSV validation failed."
+      );
+
+      setValidationErrors(
+        result.errors || []
+      );
+
+      setSalesData([]);
+
+      return;
+    }
+
+    setValidationMessage(
+      result.message || "CSV file is valid."
+    );
+
+    setValidationErrors([]);
+
+    setSalesData(result.data);
+
+    setBackendMetrics(result.metrics);
+
+    setSelectedDate("");
+    setSelectedRetailer("");
+    setSelectedProduct("");
+  } catch (error) {
+    console.error(error);
+
+    setValidationMessage(
+      "Could not connect to the FastAPI backend."
+    );
+
+    setValidationErrors([]);
+
+    setSalesData([]);
+    setBackendMetrics(null);
+  }
+}
+
+  // Get unique filter values
+  const uniqueDates = [
+    ...new Set(salesData.map((row) => row.date)),
+  ];
+
+  const uniqueRetailers = [
+    ...new Set(salesData.map((row) => row.retailer)),
+  ];
+
+  const uniqueProducts = [
+    ...new Set(salesData.map((row) => row.product)),
+  ];
+
+  return (
+    <div>
+      <h1>Sales CSV Analyzer</h1>
+
+      <p>
+        Upload your sales CSV file to analyze retail sales data.
+      </p>
+
+      <input
+        type="file"
+        accept=".csv"
+        onChange={handleFileChange}
+      />
+
+      {fileName && <p>Selected file: {fileName}</p>}
+
+      {validationMessage && (
+        <p>{validationMessage}</p>
+      )}
+
+      {validationErrors.length > 0 && (
+        <div>
+          <h2>Validation Errors</h2>
+
+          <ul>
+            {validationErrors.map((error, index) => (
+              <li key={index}>{error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {salesData.length > 0 && (
+        <div>
+          <h2>Filters</h2>
+
+          {/* Date Filter */}
+          <div>
+            <label htmlFor="date-filter">
+              Date:
+            </label>
+
+            <select
+              id="date-filter"
+              value={selectedDate}
+              onChange={(event) =>
+                setSelectedDate(event.target.value)
+              }
+            >
+              <option value="">All Dates</option>
+
+              {uniqueDates.map((date) => (
+                <option key={date} value={date}>
+                  {date}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Retailer Filter */}
+          <div>
+            <label htmlFor="retailer-filter">
+              Retailer:
+            </label>
+
+            <select
+              id="retailer-filter"
+              value={selectedRetailer}
+              onChange={(event) =>
+                setSelectedRetailer(event.target.value)
+              }
+            >
+              <option value="">All Retailers</option>
+
+              {uniqueRetailers.map((retailer) => (
+                <option key={retailer} value={retailer}>
+                  {retailer}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Product Filter */}
+          <div>
+            <label htmlFor="product-filter">
+              Product:
+            </label>
+
+            <select
+              id="product-filter"
+              value={selectedProduct}
+              onChange={(event) =>
+                setSelectedProduct(event.target.value)
+              }
+            >
+              <option value="">All Products</option>
+
+              {uniqueProducts.map((product) => (
+                <option key={product} value={product}>
+                  {product}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button onClick={handleDownloadCSV}>
+            Download Filtered CSV
+          </button>
+          
+          <button
+            onClick={() => {
+              setSelectedDate("");
+              setSelectedRetailer("");
+              setSelectedProduct("");
+            }}
+          >
+            Clear Filters
+          </button>
+        </div>
+      )}
+
+      {salesData.length > 0 && (
+        <div>
+          <h2>Sales Summary</h2>
+
+          <div>
+            <h3>Total Quantity</h3>
+            <p>{totalQuantity}</p>
+          </div>
+
+          <div>
+            <h3>Total Sales Value</h3>
+            <p>₹{totalSalesValue.toFixed(2)}</p>
+          </div>
+
+          <div>
+            <h3>Average Selling Price</h3>
+            <p>₹{averageSellingPrice.toFixed(2)}</p>
+          </div>
+
+          <div>
+            <h3>Promotion Percentage</h3>
+            <p>{promotionPercentage.toFixed(2)}%</p>
+          </div>
+        </div>
+      )}
+      {filteredData.length > 0 && (
+  <div>
+    <h2>Sales Data</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Retailer</th>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Regular Price</th>
+          <th>Promotion Price</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {filteredData.map((row, index) => (
+          <tr key={index}>
+            <td>{row.date}</td>
+            <td>{row.retailer}</td>
+            <td>{row.product}</td>
+            <td>{row.quantity}</td>
+            <td>₹{row.regularPrice.toFixed(2)}</td>
+            <td>₹{row.promotionPrice.toFixed(2)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
+  {filteredData.length > 0 && (
+  <div>
+    <h2>Sales Value by Product</h2>
+
+    <ResponsiveContainer width="100%" height={350}>
+      <BarChart data={chartData}>
+        <CartesianGrid strokeDasharray="3 3" />
+
+        <XAxis dataKey="product" />
+
+        <YAxis />
+
+        <Tooltip />
+
+        <Bar dataKey="salesValue" />
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+)}
+      
+    </div>
+  );
+}
+
+export default App;

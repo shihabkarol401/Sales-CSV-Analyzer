@@ -20,20 +20,11 @@ type SalesRow = {
   promotionPrice: number;
 };
 
-type SalesMetrics = {
-  totalQuantity: number;
-  totalSalesValue: number;
-  averageSellingPrice: number;
-  promotionPercentage: number;
-};
-
 function App() {
   const [fileName, setFileName] = useState("");
   const [validationMessage, setValidationMessage] = useState("");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [salesData, setSalesData] = useState<SalesRow[]>([]);
-  const [backendMetrics, setBackendMetrics] =
-    useState<SalesMetrics | null>(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedRetailer, setSelectedRetailer] = useState("");
   const [selectedProduct, setSelectedProduct] = useState("");
@@ -131,7 +122,6 @@ function App() {
 
   setValidationMessage("");
   setValidationErrors([]);
-  setBackendMetrics(null);
 
   const formData = new FormData();
 
@@ -183,8 +173,6 @@ function App() {
 
     setSalesData(result.data);
 
-    setBackendMetrics(result.metrics);
-
     setSelectedDate("");
     setSelectedRetailer("");
     setSelectedProduct("");
@@ -198,7 +186,6 @@ function App() {
     setValidationErrors([]);
 
     setSalesData([]);
-    setBackendMetrics(null);
   }
 }
 

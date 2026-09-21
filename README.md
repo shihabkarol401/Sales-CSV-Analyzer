@@ -4,7 +4,8 @@
 
 A full-stack web application for uploading, validating, filtering, analyzing, and exporting retail sales data from CSV files.
 
-
+## Demo
+A complete walkthrough of the application is available (.mp4) format. Please find it in the uploaded files section!
 
 ## Features
 
